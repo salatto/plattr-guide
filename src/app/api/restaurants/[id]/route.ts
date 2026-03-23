@@ -1,14 +1,102 @@
 import { NextResponse } from "next/server";
-import { serverAxios } from "@/lib/api/axios-server";
+import { supabase } from "@/lib/supabase";
 
 export async function GET(_request: Request) {
     const url = new URL(_request.url);
     const restaurantId = url.pathname.split("/").pop();
 
     try {
-        const { data } = await serverAxios.get(`/restaurants/${restaurantId}`);
+        const { data, error } = await supabase
+            .from("guide_restaurants")
+            .select(`
+                *,
+                guide_opening_hours (
+                    id,
+                    day_of_week,
+                    open_time,
+                    close_time
+                ),
+                guide_social_urls (
+                    id,
+                    url
+                ),
+                guide_gallery_images (
+                    id,
+                    image_url,
+                    display_order
+                ),
+                guide_tags (
+                    id,
+                    tag
+                )
+            `)
+            .eq("id", restaurantId)
+            .eq("is_visible", true)
+            .single();
 
-        return NextResponse.json(data, { status: 200 });
+        if (error || !data) {
+            return NextResponse.json({ error: "Restaurant not found" }, { status: 404 });
+        }
+
+        // Fetch similar restaurants from the same city
+        const { data: similar } = await supabase
+            .from("guide_restaurants")
+            .select(`
+                id,
+                title,
+                image_url,
+                city,
+                country,
+                guide_opening_hours (
+                    id,
+                    day_of_week,
+                    open_time,
+                    close_time
+                )
+            `)
+            .eq("is_visible", true)
+            .eq("city", data.city)
+            .neq("id", data.id)
+            .limit(4);
+
+        const restaurant = {
+            id: data.id,
+            title: data.title,
+            subtitle: data.subtitle,
+            description: data.description,
+            venue_type: data.venue_type,
+            owner_uuid: "",
+            image_url: data.image_url,
+            language_type: data.language_type,
+            currency_type: data.currency_type,
+            phone_number: data.phone_number,
+            is_translate_allowed: false,
+            street: data.street,
+            street_number: data.street_number,
+            zip_code: data.zip_code,
+            city: data.city,
+            country: data.country,
+            created_at: data.created_at,
+            updated_at: data.updated_at,
+            opening_hours: data.guide_opening_hours || [],
+            social_urls: data.guide_social_urls || [],
+            gallery_urls: (data.guide_gallery_images || [])
+                .sort((a: { display_order: number }, b: { display_order: number }) => a.display_order - b.display_order)
+                .map((img: { image_url: string }) => img.image_url),
+            tags: (data.guide_tags || []).map((t: { tag: string }) => t.tag),
+            categories: [],
+            menu_categories: [],
+            similar: (similar || []).map((s) => ({
+                id: s.id,
+                title: s.title,
+                image_url: s.image_url,
+                city: s.city,
+                country: s.country,
+                opening_hours: s.guide_opening_hours || [],
+            })),
+        };
+
+        return NextResponse.json(restaurant, { status: 200 });
     } catch (error) {
         console.error("Error fetching restaurant:", error);
         return NextResponse.json({ error: "Failed to fetch restaurant" }, { status: 500 });
