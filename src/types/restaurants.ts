@@ -22,7 +22,21 @@ export interface SocialUrl {
     url: string;
 }
 
-export type MenuCategory = unknown;
+export interface MenuItem {
+    id: string;
+    name: string;
+    description?: string | null;
+    price: number;
+    image_url?: string | null;
+    weight?: string | null;
+    tags?: string[];
+}
+
+export interface MenuCategory {
+    id: string;
+    name: string;
+    items: MenuItem[];
+}
 
 export interface RestaurantDetails {
     similar: RestaurantListItem[]; // Уточнили тип

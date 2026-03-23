@@ -2,22 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-
-type MenuItem = {
-    id: string;
-    name: string;
-    description?: string | null;
-    price: number;
-    image_url?: string | null;
-    weight?: string | null;
-    tags?: string[];
-};
-
-type MenuCategory = {
-    id: string;
-    name: string;
-    items: MenuItem[];
-};
+import type { MenuCategory } from "@/types/restaurants";
 
 type Props = {
     categories: MenuCategory[];
