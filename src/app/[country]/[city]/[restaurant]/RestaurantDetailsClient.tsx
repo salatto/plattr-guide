@@ -12,13 +12,11 @@ import { Section } from "@ui/Layout/Section/Section";
 
 import RestaurantHeader from "@Pages/RestaurantDetails/RestaurantHeader/RestaurantHeader";
 import ContactBlock from "@Pages/RestaurantDetails/ContactBlock/ContactBlock";
+import DescriptionBlock from "@Pages/RestaurantDetails/DescriptionBlock/DescriptionBlock";
+import MenuSection from "@Pages/RestaurantDetails/MenuSection/MenuSection";
 
-// Имитация 5 картинок для галереи
-const mockGallery = [
-    "https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1600&auto=format&fit=crop",
+// Фоллбэк-галерея если данных нет
+const fallbackGallery = [
     "https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1600&auto=format&fit=crop",
 ];
 
@@ -134,6 +132,7 @@ export default function RestaurantDetailsClient({ restaurant }: Props) {
 
     // Готовим поля под дизайн (мягкие фолыбэки)
     const categories: string[] = data.categories?.length ? data.categories : data.tags?.length ? data.tags : [];
+    const galleryImages = data.gallery_urls?.length ? data.gallery_urls : (data.image_url ? [data.image_url] : fallbackGallery);
 
     return (
         <>
@@ -144,13 +143,12 @@ export default function RestaurantDetailsClient({ restaurant }: Props) {
                 {/* Gallery */}
                 <Section className="mt-[30px] mb-[45px]">
                     <Gallery
-                        images={mockGallery}
-                    // fallbackImg={mockGallery[0] || fallbackImg}
+                        images={galleryImages}
+                        fallbackImg={fallbackGallery[0]}
                     />
                 </Section>
 
-                {/* Заголовок и контактная информация */}
-
+                {/* Header */}
                 <Section className="mx-auto mt-[22px] px-5 py-6 md:p-8 bg-[#FAFAFA] rounded-[23px]">
                     <RestaurantHeader
                         title={data.title}
@@ -158,14 +156,31 @@ export default function RestaurantDetailsClient({ restaurant }: Props) {
                         statusText={st.statusText}
                         isOpen={st.isOpen}
                         categories={categories}
-                        onMenuClick={() => console.log("Menu clicked")}
-                        onLocationClick={() => console.log("Location clicked")}
-                        onShareClick={() => console.log("Share clicked")}
+                        onMenuClick={() => {
+                            document.getElementById("menu-section")?.scrollIntoView({ behavior: "smooth" });
+                        }}
+                        onLocationClick={() => {
+                            document.getElementById("contact-section")?.scrollIntoView({ behavior: "smooth" });
+                        }}
+                        onShareClick={() => {
+                            if (navigator.share) {
+                                navigator.share({ title: data.title, url: window.location.href });
+                            } else {
+                                navigator.clipboard.writeText(window.location.href);
+                            }
+                        }}
                     />
                 </Section>
 
+                {/* Description */}
+                {data.description && (
+                    <Section className="mx-auto mt-[22px] px-5 py-6 md:p-8 bg-[#FAFAFA] rounded-[23px]">
+                        <DescriptionBlock description={data.description} />
+                    </Section>
+                )}
+
                 {/* Contact & Location */}
-                <Section className="mx-auto mt-[22px] px-5 py-6 md:p-8 bg-[#FAFAFA] rounded-[23px]">
+                <Section id="contact-section" className="mx-auto mt-[22px] px-5 py-6 md:p-8 bg-[#FAFAFA] rounded-[23px]">
                     <ContactBlock
                         phone={data.phone_number}
                         website={data.social_urls?.[0]?.url}
@@ -179,29 +194,21 @@ export default function RestaurantDetailsClient({ restaurant }: Props) {
                 {/* Opening Hours */}
                 <Section className="mx-auto mt-[22px] px-5 py-6 md:p-8 bg-[#FAFAFA] rounded-[23px]">
                     <div className="w-full md:max-w-md">
-                        {/* Заголовок */}
                         <h2 className="text-2xl font-semibold leading-[29px] text-neutral-900">
                             Opening hours
                         </h2>
-
-                        {/* Подзаголовок */}
                         <p className="mt-2 text-base font-normal leading-6 text-[#6B7280]">
                             Plan your visit right – here&apos;s when the doors are open
                         </p>
-
-                        {/* Список дней и времени */}
                         <div className="mt-6 space-y-2">
                             {data.opening_hours?.map((oh: OpeningHour) => (
                                 <div
                                     key={oh.id}
                                     className="flex items-center justify-between"
                                 >
-                                    {/* День недели */}
                                     <span className="text-[16px] leading-6 font-normal text-black">
                                         {dayLabel[oh.day_of_week]}
                                     </span>
-
-                                    {/* Часы работы */}
                                     {oh.open_time && oh.close_time ? (
                                         <span className="text-[16px] leading-6 font-normal text-black">
                                             {hhmm(oh.open_time)} – {hhmm(oh.close_time)}
@@ -216,6 +223,16 @@ export default function RestaurantDetailsClient({ restaurant }: Props) {
                         </div>
                     </div>
                 </Section>
+
+                {/* Menu */}
+                {data.menu_categories && data.menu_categories.length > 0 && (
+                    <Section id="menu-section" className="mx-auto mt-[22px] px-5 py-6 md:p-8 bg-[#FAFAFA] rounded-[23px]">
+                        <MenuSection
+                            categories={data.menu_categories}
+                            currency={data.currency_type}
+                        />
+                    </Section>
+                )}
             </Container>
         </>
     );
