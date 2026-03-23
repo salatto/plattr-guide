@@ -14,6 +14,7 @@ import RestaurantHeader from "@Pages/RestaurantDetails/RestaurantHeader/Restaura
 import ContactBlock from "@Pages/RestaurantDetails/ContactBlock/ContactBlock";
 import DescriptionBlock from "@Pages/RestaurantDetails/DescriptionBlock/DescriptionBlock";
 import MenuSection from "@Pages/RestaurantDetails/MenuSection/MenuSection";
+import LoyaltySection from "@Pages/RestaurantDetails/LoyaltySection/LoyaltySection";
 
 // Фоллбэк-галерея если данных нет
 const fallbackGallery = [
@@ -171,6 +172,16 @@ export default function RestaurantDetailsClient({ restaurant }: Props) {
                         }}
                     />
                 </Section>
+
+                {/* Loyalty & Rewards */}
+                {data.loyalty_programs && data.loyalty_programs.length > 0 && (
+                    <Section className="mx-auto mt-[22px] px-5 py-6 md:p-8 bg-[#FAFAFA] rounded-[23px]">
+                        <LoyaltySection
+                            programs={data.loyalty_programs}
+                            restaurantName={data.title}
+                        />
+                    </Section>
+                )}
 
                 {/* Description */}
                 {data.description && (

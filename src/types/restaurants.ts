@@ -66,6 +66,27 @@ export interface RestaurantDetails {
     social_urls: SocialUrl[];
     opening_hours: OpeningHours[];
     menu_categories: MenuCategory[];
+    loyalty_programs?: LoyaltyProgram[];
+}
+
+export interface LoyaltyProgram {
+    id: string;
+    restaurant_id: number;
+    program_type: 'stamp_card' | 'welcome_offer' | 'points' | 'cashback' | 'vip_tiers' | 'referral' | 'subscription';
+    is_active: boolean;
+    title: string;
+    description?: string | null;
+    icon?: string | null;
+    stamps_required?: number | null;
+    stamp_reward?: string | null;
+    offer_text?: string | null;
+    offer_conditions?: string | null;
+    offer_valid_days?: number | null;
+    points_per_euro?: number | null;
+    points_to_euro?: number | null;
+    cashback_percent?: number | null;
+    tiers?: Array<{ name: string; min_visits: number; discount_percent: number; perks: string }> | null;
+    terms?: string | null;
 }
 
 export interface GetRestaurantsParams {

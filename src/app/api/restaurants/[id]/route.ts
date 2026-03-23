@@ -60,6 +60,13 @@ export async function GET(_request: Request) {
             .eq("is_active", true)
             .order("display_order", { ascending: true });
 
+        // Fetch loyalty programs
+        const { data: loyaltyPrograms } = await supabase
+            .from("guide_loyalty_programs")
+            .select("*")
+            .eq("restaurant_id", data.id)
+            .eq("is_active", true);
+
         // Fetch similar restaurants from the same city
         const { data: similar } = await supabase
             .from("guide_restaurants")
@@ -136,6 +143,7 @@ export async function GET(_request: Request) {
             tags: (data.guide_tags || []).map((t: { tag: string }) => t.tag),
             categories: [],
             menu_categories,
+            loyalty_programs: loyaltyPrograms || [],
             similar: (similar || []).map((s) => ({
                 id: s.id,
                 title: s.title,
