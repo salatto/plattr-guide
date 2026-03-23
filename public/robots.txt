@@ -1,0 +1,30 @@
+# robots.txt for plattr.guide
+
+User-agent: *
+Allow: /
+
+# Disallow admin and private areas
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /private/
+
+# Allow important SEO pages
+Allow: /search/
+
+# Allow new geographic structure
+# /germany/
+# /germany/berlin/
+# /germany/berlin/restaurant-name-123
+Allow: /*/
+Allow: /*/*/
+Allow: /*/*/*
+
+# Disallow old restaurant ID patterns if needed
+# (keep for backwards compatibility during transition)
+
+# Sitemap location
+Sitemap: https://plattr.guide/sitemap.xml
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1
