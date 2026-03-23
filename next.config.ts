@@ -12,9 +12,6 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   
-  // Оптимизация сборки
-  swcMinify: true,
-  
   // Оптимизация для производительности
   experimental: {
     optimizePackageImports: ['@/components', '@/lib', '@/features'],
